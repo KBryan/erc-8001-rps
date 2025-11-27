@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPS Arena | ERC-8001</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- CRT Overlay -->
+    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
+
+    <!-- Main Container -->
+    <div class="arcade-cabinet">
+        <!-- Header -->
+        <header class="arcade-header">
+            <div class="neon-sign">
+                <h1>RPS ARENA</h1>
+                <span class="subtitle">ERC-8001 POWERED</span>
+            </div>
+            <div class="wallet-status" id="walletStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">NOT CONNECTED</span>
+            </div>
+        </header>
+
+        <!-- Main Screen -->
+        <main class="game-screen">
+            <!-- Connection Screen -->
+            <section class="screen active" id="connectScreen">
+                <div class="insert-coin">
+                    <div class="coin-slot"></div>
+                    <p class="blink">CONNECT WALLET TO PLAY</p>
+                    <button class="arcade-btn primary" id="connectBtn">
+                        <span class="btn-text">CONNECT</span>
+                        <span class="btn-shadow"></span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Lobby Screen -->
+            <section class="screen" id="lobbyScreen">
+                <div class="lobby-container">
+                    <div class="player-info">
+                        <div class="pixel-avatar" id="playerAvatar"></div>
+                        <p class="player-address" id="playerAddress">0x...</p>
+                        <p class="player-balance">BAL: <span id="playerBalance">0.00</span> ETH</p>
+                    </div>
+
+                    <div class="menu-options">
+                        <button class="arcade-btn" id="newGameBtn">
+                            <span class="btn-text">NEW GAME</span>
+                        </button>
+                        <button class="arcade-btn" id="joinGameBtn">
+                            <span class="btn-text">JOIN GAME</span>
+                        </button>
+                        <button class="arcade-btn" id="myGamesBtn">
+                            <span class="btn-text">MY GAMES</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New Game Screen -->
+            <section class="screen" id="newGameScreen">
+                <div class="form-container">
+                    <h2 class="screen-title">CREATE CHALLENGE</h2>
+                    
+                    <div class="form-group">
+                        <label>OPPONENT ADDRESS</label>
+                        <input type="text" id="opponentAddress" placeholder="0x..." class="arcade-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WAGER (ETH)</label>
+                        <div class="wager-selector">
+                            <button class="wager-btn" data-amount="0.001">0.001</button>
+                            <button class="wager-btn" data-amount="0.01">0.01</button>
+                            <button class="wager-btn" data-amount="0.1">0.1</button>
+                            <input type="number" id="wagerAmount" value="0.01" step="0.001" min="0" class="arcade-input small">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>YOUR MOVE (SECRET)</label>
+                        <div class="move-selector">
+                            <button class="move-btn" data-move="1">
+                                <span class="move-icon">✊</span>
+                                <span class="move-name">ROCK</span>
+                            </button>
+                            <button class="move-btn" data-move="2">
+                                <span class="move-icon">✋</span>
+                                <span class="move-name">PAPER</span>
+                            </button>
+                            <button class="move-btn" data-move="3">
+                                <span class="move-icon">✌️</span>
+                                <span class="move-name">SCISSORS</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="arcade-btn secondary" id="backToLobbyBtn">BACK</button>
+                        <button class="arcade-btn primary" id="createGameBtn">CREATE</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Join Game Screen -->
+            <section class="screen" id="joinGameScreen">
+                <div class="form-container">
+                    <h2 class="screen-title">JOIN CHALLENGE</h2>
+                    
+                    <div class="form-group">
+                        <label>GAME ID (INTENT HASH)</label>
+                        <input type="text" id="gameIdInput" placeholder="0x..." class="arcade-input">
+                    </div>
+
+                    <div class="game-preview" id="gamePreview" style="display: none;">
+                        <div class="preview-row">
+                            <span>CHALLENGER:</span>
+                            <span id="previewChallenger">---</span>
+                        </div>
+                        <div class="preview-row">
+                            <span>WAGER:</span>
+                            <span id="previewWager">---</span>
+                        </div>
+                        <div class="preview-row">
+                            <span>EXPIRES:</span>
+                            <span id="previewExpiry">---</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="joinMoveSelection" style="display: none;">
+                        <label>YOUR MOVE (SECRET)</label>
+                        <div class="move-selector">
+                            <button class="move-btn" data-move="1">
+                                <span class="move-icon">✊</span>
+                                <span class="move-name">ROCK</span>
+                            </button>
+                            <button class="move-btn" data-move="2">
+                                <span class="move-icon">✋</span>
+                                <span class="move-name">PAPER</span>
+                            </button>
+                            <button class="move-btn" data-move="3">
+                                <span class="move-icon">✌️</span>
+                                <span class="move-name">SCISSORS</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="arcade-btn secondary" id="backFromJoinBtn">BACK</button>
+                        <button class="arcade-btn" id="loadGameBtn">LOAD</button>
+                        <button class="arcade-btn primary" id="acceptGameBtn" style="display: none;">ACCEPT</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Active Game Screen -->
+            <section class="screen" id="gameScreen">
+                <div class="game-arena">
+                    <h2 class="screen-title">BATTLE ARENA</h2>
+                    
+                    <div class="versus-display">
+                        <div class="player-side player1">
+                            <div class="player-label">YOU</div>
+                            <div class="move-display" id="yourMoveDisplay">?</div>
+                            <div class="status-label" id="yourStatus">WAITING</div>
+                        </div>
+                        
+                        <div class="vs-divider">
+                            <span>VS</span>
+                        </div>
+                        
+                        <div class="player-side player2">
+                            <div class="player-label">OPPONENT</div>
+                            <div class="move-display" id="opponentMoveDisplay">?</div>
+                            <div class="status-label" id="opponentStatus">WAITING</div>
+                        </div>
+                    </div>
+
+                    <div class="game-info">
+                        <div class="info-row">
+                            <span>GAME ID:</span>
+                            <span id="currentGameId" class="mono">---</span>
+                        </div>
+                        <div class="info-row">
+                            <span>POT:</span>
+                            <span id="currentPot">0.00 ETH</span>
+                        </div>
+                        <div class="info-row">
+                            <span>STATUS:</span>
+                            <span id="currentStatus">---</span>
+                        </div>
+                        <div class="info-row">
+                            <span>TIME LEFT:</span>
+                            <span id="timeLeft">--:--</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="arcade-btn primary" id="revealBtn" style="display: none;">REVEAL MOVE</button>
+                        <button class="arcade-btn" id="refreshGameBtn">REFRESH</button>
+                        <button class="arcade-btn secondary" id="backFromGameBtn">EXIT</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Games Screen -->
+            <section class="screen" id="myGamesScreen">
+                <div class="games-list-container">
+                    <h2 class="screen-title">MY GAMES</h2>
+                    
+                    <div class="games-list" id="gamesList">
+                        <!-- Games will be populated here -->
+                        <div class="empty-state">NO GAMES YET</div>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="arcade-btn secondary" id="backFromGamesBtn">BACK</button>
+                        <button class="arcade-btn" id="refreshGamesBtn">REFRESH</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Result Screen -->
+            <section class="screen" id="resultScreen">
+                <div class="result-container">
+                    <div class="result-title" id="resultTitle">WINNER!</div>
+                    
+                    <div class="result-moves">
+                        <div class="result-move">
+                            <span class="move-icon large" id="resultMove1">✊</span>
+                            <span>YOU</span>
+                        </div>
+                        <div class="result-vs">VS</div>
+                        <div class="result-move">
+                            <span class="move-icon large" id="resultMove2">✌️</span>
+                            <span>OPP</span>
+                        </div>
+                    </div>
+
+                    <div class="result-prize" id="resultPrize">
+                        +0.02 ETH
+                    </div>
+
+                    <button class="arcade-btn primary" id="playAgainBtn">PLAY AGAIN</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer Controls -->
+        <footer class="arcade-footer">
+            <div class="network-info">
+                <span class="network-dot"></span>
+                <span id="networkName">---</span>
+            </div>
+            <div class="contract-info">
+                CONTRACT: <span id="contractAddress" class="mono">---</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-header">
+            <span>🔧 DEBUG INFO</span>
+            <button class="debug-toggle" id="debugToggle">−</button>
+        </div>
+        <div class="debug-content" id="debugContent">
+            <div class="debug-section">
+                <div class="debug-label">WALLET</div>
+                <div class="debug-row">
+                    <span>Address:</span>
+                    <span id="debugAddress" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Chain ID:</span>
+                    <span id="debugChainId" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Nonce:</span>
+                    <span id="debugNonce" class="debug-value">---</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <div class="debug-label">CONTRACT</div>
+                <div class="debug-row">
+                    <span>Address:</span>
+                    <span id="debugContract" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Domain Sep:</span>
+                    <span id="debugDomain" class="debug-value copyable">---</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <div class="debug-label">CURRENT GAME</div>
+                <div class="debug-row">
+                    <span>Intent Hash:</span>
+                    <span id="debugIntentHash" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Your Commitment:</span>
+                    <span id="debugYourCommitment" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Your Salt:</span>
+                    <span id="debugYourSalt" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Your Move:</span>
+                    <span id="debugYourMove" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Is Player1:</span>
+                    <span id="debugIsPlayer1" class="debug-value">---</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <div class="debug-label">GAME STATE (ON-CHAIN)</div>
+                <div class="debug-row">
+                    <span>Player1:</span>
+                    <span id="debugPlayer1" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Player2:</span>
+                    <span id="debugPlayer2" class="debug-value copyable">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Wager:</span>
+                    <span id="debugWager" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Status:</span>
+                    <span id="debugStatus" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>P1 Committed:</span>
+                    <span id="debugP1Committed" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>P2 Committed:</span>
+                    <span id="debugP2Committed" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>P1 Move:</span>
+                    <span id="debugP1Move" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>P2 Move:</span>
+                    <span id="debugP2Move" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Result:</span>
+                    <span id="debugResult" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Expiry:</span>
+                    <span id="debugExpiry" class="debug-value">---</span>
+                </div>
+                <div class="debug-row">
+                    <span>Reveal Deadline:</span>
+                    <span id="debugRevealDeadline" class="debug-value">---</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <div class="debug-label">RECENT TX</div>
+                <div class="debug-row">
+                    <span>Last TX:</span>
+                    <span id="debugLastTx" class="debug-value copyable">---</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <div class="debug-label">EVENT LOG</div>
+                <div class="debug-log" id="debugLog">
+                    <div class="log-entry">Waiting for events...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p id="loadingText">PROCESSING...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
